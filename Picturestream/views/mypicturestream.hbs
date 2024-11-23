@@ -1,0 +1,11 @@
+<h2>My Picturestream</h2>
+{{#each pictures}}
+  <div class="card">
+    <img src="/uploads/{{file_name}}" alt="{{title}}" />
+    <h3>{{title}}</h3>
+    <p>{{description}}</p>
+    <small>Uploaded by {{user_id}} on {{time}}</small>
+  </div>
+{{else}}
+  <p>No favorites yet!</p>
+{{/each}}
