@@ -1,26 +1,58 @@
-<h2>Register</h2>
-<form action="/register" method="POST">
-  <input
-    type="text"
-    name="username"
-    placeholder="Username"
-    class="form-control"
-    required
-  />
-  <input
-    type="email"
-    name="email"
-    placeholder="Email"
-    class="form-control"
-    required
-  />
-  <input
-    type="password"
-    name="password"
-    placeholder="Password"
-    class="form-control"
-    required
-  />
-  <button type="submit">Register</button>
-</form>
-<p>Already have an account? <a href="/login">Login here</a>.</p>
+<div class="form-container">
+  <h2>Registrieren</h2>
+
+  <!-- Fehlermeldung anzeigen, falls vorhanden -->
+  {{#if error}}
+    <p style="color: red; font-weight: bold;">{{error}}</p>
+  {{/if}}
+
+  <!-- Registrierungsformular -->
+  <form action="/register" method="POST">
+    <!-- Eingabe für Benutzername -->
+    <label for="username">Benutzername:</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      placeholder="Benutzername"
+      required
+      style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"
+    />
+
+    <!-- Eingabe für E-Mail -->
+    <label for="email">E-Mail-Adresse:</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="E-Mail-Adresse"
+      required
+      style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"
+    />
+
+    <!-- Eingabe für Passwort -->
+    <label for="password">Passwort:</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Passwort"
+      required
+      style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"
+    />
+
+    <!-- Registrieren-Button -->
+    <button
+      type="submit"
+      style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;"
+    >
+      Registrieren
+    </button>
+  </form>
+
+  <!-- Link zur Login-Seite -->
+  <p style="text-align: center; margin-top: 20px;">
+    Haben Sie schon ein Konto?
+    <a href="/login" style="color: #007bff; text-decoration: none;">Login</a>
+  </p>
+</div>

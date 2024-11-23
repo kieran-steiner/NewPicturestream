@@ -1,19 +1,50 @@
-<h2>Login</h2>
-<form action="/login" method="POST">
-  <input
-    type="text"
-    name="username"
-    placeholder="Username"
-    class="form-control"
-    required
-  />
-  <input
-    type="password"
-    name="password"
-    placeholder="Password"
-    class="form-control"
-    required
-  />
-  <button type="submit">Login</button>
-</form>
-<p>Don't have an account? <a href="/register">Register here</a>.</p>
+<div class="form-container">
+  <h2>Login</h2>
+
+  <!-- Fehlermeldung anzeigen, falls vorhanden -->
+  {{#if error}}
+    <p style="color: red; font-weight: bold;">{{error}}</p>
+  {{/if}}
+
+  <!-- Login-Formular -->
+  <form action="/login" method="POST">
+    <!-- Eingabe für Benutzername -->
+    <label for="username">Benutzername:</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      placeholder="Benutzername"
+      required
+      style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"
+    />
+
+    <!-- Eingabe für Passwort -->
+    <label for="password">Passwort:</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Passwort"
+      required
+      style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"
+    />
+
+    <!-- Anmelden-Button -->
+    <button
+      type="submit"
+      style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;"
+    >
+      Anmelden
+    </button>
+  </form>
+
+  <!-- Link zur Registrierungsseite -->
+  <p style="text-align: center; margin-top: 20px;">
+    Haben Sie noch kein Konto?
+    <a
+      href="/register"
+      style="color: #007bff; text-decoration: none;"
+    >Registrieren</a>
+  </p>
+</div>

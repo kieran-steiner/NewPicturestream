@@ -3,25 +3,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Picturestream</title>
+    <!-- Stylesheet einbinden -->
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <header>
+    <!-- Globaler Header -->
+    <header
+      style="text-align: center; padding: 20px 0; background-color: #333; color: white;"
+    >
       <h1>Picturestream</h1>
-      {{#if user}}
-        <nav>
-          <a href="/picturestream">Home</a>
-          |
-          <a href="/mypicturestream">My Favorites</a>
-          |
-          <a href="/upload">Upload</a>
-          |
-          <a href="/logout">Logout</a>
-        </nav>
-      {{/if}}
+      <p>Teile deine Eventfotos mit der Community!</p>
     </header>
-    <div class="container">
+
+    <!-- Navigationsleiste -->
+    <nav style="text-align: center; margin: 20px 0;">
+      <!-- Navigationslinks als Buttons -->
+      <a href="/picturestream" class="nav-button">Picturestream</a>
+      <a href="/mypicturestream" class="nav-button">My Picturestream</a>
+      <a href="/upload" class="nav-button">Upload</a>
+      <a href="/logout" class="nav-button">Logout</a>
+    </nav>
+
+    <!-- Hauptinhalt der jeweiligen Seite -->
+    <main class="container" style="padding: 20px;">
       {{{body}}}
-    </div>
+    </main>
+
+    <!-- Globaler Footer -->
+    <footer
+      style="text-align: center; margin-top: 50px; padding: 10px; background-color: #f4f4f4;"
+    >
+      <p>&copy; 2024 Picturestream Kieran Steiner - Alle Rechte vorbehalten.</p>
+    </footer>
   </body>
 </html>

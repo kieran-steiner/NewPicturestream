@@ -1,3 +1,4 @@
+// Import von Modulen
 const express = require("express");
 const { engine } = require("express-handlebars");
 const session = require("express-session");
@@ -6,19 +7,21 @@ const bcrypt = require("bcrypt");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const path = require("path");
+const { check, validationResult } = require("express-validator"); // Validator importieren
 
 // App-Konfiguration
 const app = express();
 const db = new sqlite3.Database("./database.sqlite");
 const upload = multer({ dest: "public/uploads/" });
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(bodyParser.urlencoded({ extended: true })); // Für POST-Anfragen
+app.use(express.static(path.join(__dirname, "public"))); // Statische Dateien
 app.use(
   session({
-    secret: "your_secret_key",
+    secret: "your_secret_key", // Sicherheits-Schlüssel
     resave: false,
     saveUninitialized: true,
+    cookie: { maxAge: 30 * 60 * 1000 }, // Session-Timeout 30 Minuten
   })
 );
 
@@ -28,12 +31,14 @@ app.set("view engine", "hbs");
 
 // Datenbank-Setup
 db.serialize(() => {
+  // Benutzer-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL
   )`);
+  // Bilder-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS pictures (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_name TEXT,
@@ -42,6 +47,7 @@ db.serialize(() => {
     user_id INTEGER,
     time DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  // Favoriten-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS users_pictures_favorites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -50,77 +56,133 @@ db.serialize(() => {
   )`);
 });
 
-// Middleware für Benutzersitzungen
+// Middleware für Authentifizierung
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
-    next();
+    next(); // Benutzer ist authentifiziert
   } else {
-    res.redirect("/login");
+    res.redirect("/login"); // Weiterleitung zur Login-Seite
   }
 };
 
-// Routen
+// Startseite
 app.get("/", (req, res) => res.redirect("/login"));
 
-app.get("/login", (req, res) =>
-  res.render("login", { error: req.query.error })
+// Login-Seite
+app.get(
+  "/login",
+  (req, res) => res.render("login", { error: req.query.error }) // Zeigt Fehlermeldungen an
 );
 
+// Login-Logik
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // Benutzer suchen
+  // Benutzer in der Datenbank suchen
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
-    if (err || !user) {
-      res.redirect("/login?error=Benutzername nicht gefunden");
+    if (err) {
+      // Datenbankfehler
+      console.error("Datenbankfehler:", err);
+      res.render("login", {
+        error:
+          "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+      });
       return;
     }
 
-    // Passwort validieren
+    if (!user) {
+      // Benutzername nicht gefunden
+      res.render("login", { error: "Benutzername nicht gefunden." });
+      return;
+    }
+
+    // Passwort überprüfen
     const isPasswordValid = bcrypt.compareSync(password, user.password);
     if (!isPasswordValid) {
-      res.redirect("/login?error=Ungültige Anmeldedaten");
+      res.render("login", {
+        error: "Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.",
+      });
       return;
     }
 
     // Benutzer erfolgreich authentifiziert
-    req.session.user = { id: user.id, username: user.username };
-    res.redirect("/picturestream");
+    req.session.user = { id: user.id, username: user.username }; // Sitzung setzen
+    res.redirect("/picturestream"); // Weiterleitung zur Picturestream-Seite
   });
 });
 
+// Registrierungsseite
 app.get("/register", (req, res) =>
   res.render("register", { error: req.query.error })
 );
 
-app.post("/register", (req, res) => {
-  const { username, email, password } = req.body;
+// Registrierung mit Validierung
+app.post(
+  "/register",
+  [
+    // Validierungsregeln
+    check("username")
+      .isAlphanumeric()
+      .withMessage("Der Benutzername darf nur Buchstaben und Zahlen enthalten.")
+      .isLength({ min: 3 })
+      .withMessage("Der Benutzername muss mindestens 3 Zeichen lang sein."),
+    check("email")
+      .isEmail()
+      .withMessage("Bitte geben Sie eine gültige E-Mail-Adresse ein."),
+    check("password")
+      .isLength({ min: 6 })
+      .withMessage("Das Passwort muss mindestens 6 Zeichen lang sein."),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
 
-  // Passwort hashen
-  const hashedPassword = bcrypt.hashSync(password, 10);
+    // Fehler anzeigen, falls Validierung fehlschlägt
+    if (!errors.isEmpty()) {
+      return res.render("register", { error: errors.array()[0].msg });
+    }
 
-  // Benutzer speichern
-  db.run(
-    "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-    [username, email, hashedPassword],
-    (err) => {
-      if (err) {
-        res.redirect(
-          "/register?error=Benutzername oder E-Mail bereits registriert"
-        );
-      } else {
+    const { username, email, password } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10); // Passwort hashen
+
+    // Benutzer in der Datenbank speichern
+    db.run(
+      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      [username, email, hashedPassword],
+      (err) => {
+        if (err) {
+          // Datenbankfehler behandeln: Benutzername oder E-Mail bereits registriert
+          if (err.message.includes("UNIQUE constraint failed")) {
+            const conflictField = err.message.includes("username")
+              ? "Benutzername"
+              : "E-Mail-Adresse";
+            return res.render("register", {
+              error: `${conflictField} ist bereits registriert.`,
+            });
+          }
+
+          // Generische Fehlermeldung
+          console.error("Datenbankfehler:", err);
+          return res.render("register", {
+            error:
+              "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+          });
+        }
+
+        // Erfolgreich registriert, weiterleiten zum Login
         res.redirect("/login");
       }
-    }
-  );
-});
+    );
+  }
+);
 
+// Picturestream-Seite
 app.get("/picturestream", isAuthenticated, (req, res) => {
   db.all("SELECT * FROM pictures", [], (err, pictures) => {
     res.render("picturestream", { pictures, user: req.session.user });
   });
 });
 
+// My Picturestream-Seite
 app.get("/mypicturestream", isAuthenticated, (req, res) => {
   db.all(
     `SELECT p.* FROM pictures p
@@ -133,8 +195,10 @@ app.get("/mypicturestream", isAuthenticated, (req, res) => {
   );
 });
 
+// Upload-Seite
 app.get("/upload", isAuthenticated, (req, res) => res.render("upload"));
 
+// Bilder hochladen
 app.post("/upload", isAuthenticated, upload.single("picture"), (req, res) => {
   const { title, description } = req.body;
 
@@ -147,6 +211,7 @@ app.post("/upload", isAuthenticated, upload.single("picture"), (req, res) => {
   );
 });
 
+// Favoriten hinzufügen
 app.post("/favorite/:id", isAuthenticated, (req, res) => {
   const pictureId = req.params.id;
 
@@ -159,6 +224,7 @@ app.post("/favorite/:id", isAuthenticated, (req, res) => {
   );
 });
 
+// Logout
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
 });
