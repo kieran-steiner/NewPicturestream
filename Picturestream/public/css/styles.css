@@ -1,90 +1,134 @@
+/* Global Styles */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
   margin: 0;
   padding: 0;
-}
-
-header {
-  background: #333;
-  color: #fff;
-  padding: 1rem 0;
-  text-align: center;
-}
-
-a {
+  background-color: #f9f9f9;
   color: #333;
-  text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+/* Header Styles */
+header {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
 }
 
-.container {
-  width: 80%;
-  margin: auto;
-  overflow: hidden;
-  padding: 2rem 0;
+header h1 {
+  margin: 0;
+  font-size: 24px;
 }
 
-button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
+header p {
+  margin: 5px 0 0;
+  font-size: 14px;
 }
 
-button:hover {
-  background-color: #0056b3;
+/* Navigation Styles */
+nav {
+  text-align: center;
+  margin: 20px 0;
 }
 
-.form-control {
-  display: block;
-  width: 100%;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.card {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin: 1rem 0;
-  padding: 1rem;
-  background: #fff;
-}
-
-.card img {
-  max-width: 100%;
-  border-radius: 5px;
-}
-
-.card h3 {
-  margin: 0.5rem 0;
-}
-
-.card p {
-  color: #555;
-}
-
-/* Navigation Buttons */
 .nav-button {
-  text-decoration: none; /* Kein Unterstreichen */
-  color: white; /* Weiße Schrift */
-  background-color: #007bff; /* Blauer Hintergrund */
-  padding: 10px 20px; /* Innenabstand */
-  border-radius: 5px; /* Abgerundete Ecken */
-  margin: 0 10px; /* Abstand zwischen Buttons */
-  font-size: 16px; /* Schriftgröße */
-  font-weight: bold; /* Fettgedruckte Schrift */
-  display: inline-block; /* Als Blockelement für Padding */
+  text-decoration: none;
+  color: white;
+  background-color: #007bff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin: 0 10px;
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
 }
 
 .nav-button:hover {
-  background-color: #0056b3; /* Dunkleres Blau beim Hover */
-  color: white; /* Weiße Schrift bleibt sichtbar */
+  background-color: #0056b3;
+}
+
+/* Main Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Grid Layout for Pictures */
+.pictures-container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(200px, 1fr)
+  ); /* Dynamische Spalten */
+  gap: 20px; /* Abstand zwischen den Bildern */
+  margin: 20px 0;
+  padding: 0;
+}
+
+/* Individual Picture Cards */
+.picture-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.picture-card:hover {
+  transform: scale(1.03); /* Leichter Vergrößerungseffekt beim Hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Picture Styling */
+.picture-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Title and Description */
+.picture-card h3 {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.picture-card p {
+  font-size: 14px;
+  color: #555;
+  margin: 0 10px 10px;
+}
+
+.picture-card small {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Button Styling in Cards */
+.picture-card button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.picture-card button:hover {
+  background-color: #0056b3;
+}
+
+/* Footer Styles */
+footer {
+  text-align: center;
+  padding: 10px 0;
+  background-color: #f4f4f4;
+  color: #555;
+  font-size: 14px;
+  margin-top: 50px;
 }

@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const path = require("path");
-const { check, validationResult } = require("express-validator"); // Validator importieren
+const { check, validationResult } = require("express-validator"); // Inputvalidator für Registrierung importieren
 
 // App-Konfiguration
 const app = express();
@@ -25,7 +25,7 @@ app.use(
   })
 );
 
-// Handlebars als Template-Engine einrichten
+// Handlebars als Template-Engine einrichten und Definition von .hbs als Erweiterung
 app.engine("hbs", engine({ defaultLayout: "main", extname: ".hbs" }));
 app.set("view engine", "hbs");
 
@@ -120,7 +120,7 @@ app.get("/register", (req, res) =>
 app.post(
   "/register",
   [
-    // Validierungsregeln
+    // Validierungsregeln bei der Userregistrierung
     check("username")
       .isAlphanumeric()
       .withMessage("Der Benutzername darf nur Buchstaben und Zahlen enthalten.")
@@ -160,7 +160,7 @@ app.post(
             });
           }
 
-          // Generische Fehlermeldung
+          // Generische Fehlermeldung bei Datenbankfehler
           console.error("Datenbankfehler:", err);
           return res.render("register", {
             error:
@@ -175,21 +175,32 @@ app.post(
   }
 );
 
-// Picturestream-Seite
+// Route für Picturestream Seite - Selectiert die Bilder nach Uploaddatum
 app.get("/picturestream", isAuthenticated, (req, res) => {
-  db.all("SELECT * FROM pictures", [], (err, pictures) => {
+  db.all("SELECT * FROM pictures ORDER BY time DESC", [], (err, pictures) => {
+    if (err) {
+      return res.render("picturestream", {
+        error: "Fehler beim Laden der Bilder.",
+      });
+    }
     res.render("picturestream", { pictures, user: req.session.user });
   });
 });
 
-// My Picturestream-Seite
+// Route für My Picturestream Seite - Selectiert die favorisierten Bilder nach Uploaddatum
 app.get("/mypicturestream", isAuthenticated, (req, res) => {
   db.all(
     `SELECT p.* FROM pictures p
      INNER JOIN users_pictures_favorites f ON p.id = f.picture_id
-     WHERE f.user_id = ? AND f.is_favorite = 1`,
+     WHERE f.user_id = ? AND f.is_favorite = 1
+     ORDER BY p.time DESC`,
     [req.session.user.id],
     (err, pictures) => {
+      if (err) {
+        return res.render("mypicturestream", {
+          error: "Fehler beim Laden der Favoriten.",
+        });
+      }
       res.render("mypicturestream", { pictures, user: req.session.user });
     }
   );
@@ -229,7 +240,7 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
 });
 
-// Server starten
+// Server starten und Port setzen
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Server läuft auf http://localhost:${PORT}`)

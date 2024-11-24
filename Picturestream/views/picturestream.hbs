@@ -1,14 +1,16 @@
 <h2>Picturestream</h2>
-{{#each pictures}}
-  <div class="card">
-    <img src="/uploads/{{file_name}}" alt="{{title}}" />
-    <h3>{{title}}</h3>
-    <p>{{description}}</p>
-    <small>Uploaded by {{user_id}} on {{time}}</small>
-    <form action="/favorite/{{id}}" method="POST">
-      <button type="submit">❤️ Add to Favorites</button>
-    </form>
-  </div>
-{{else}}
-  <p>No pictures uploaded yet!</p>
-{{/each}}
+<div class="pictures-container">
+  {{#each pictures}}
+    <div class="picture-card">
+      <img src="/uploads/{{file_name}}" alt="{{title}}" />
+      <h3>{{title}}</h3>
+      <p>{{description}}</p>
+      <small>Hochgeladen am {{time}}</small>
+      <form action="/favorite/{{id}}" method="POST">
+        <button type="submit">❤️ Zu Favoriten</button>
+      </form>
+    </div>
+  {{else}}
+    <p>Es wurden noch keine Bilder hochgeladen.</p>
+  {{/each}}
+</div>
