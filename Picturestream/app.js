@@ -1,4 +1,4 @@
-// Import von Modulen
+// Import benötigter Module
 const express = require("express");
 const { engine } = require("express-handlebars");
 const session = require("express-session");
@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const path = require("path");
-const { check, validationResult } = require("express-validator"); // Inputvalidator für Registrierung importieren
+const { check, validationResult } = require("express-validator");
 
 // App-Konfiguration
 const app = express();
@@ -21,24 +21,22 @@ app.use(
     secret: "your_secret_key", // Sicherheits-Schlüssel
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 30 * 60 * 1000 }, // Session-Timeout 30 Minuten
+    cookie: { maxAge: 30 * 60 * 1000 }, // Session-Timeout: 30 Minuten
   })
 );
 
-// Handlebars als Template-Engine einrichten und Definition von .hbs als Erweiterung
+// Handlebars als Template-Engine einrichten
 app.engine("hbs", engine({ defaultLayout: "main", extname: ".hbs" }));
 app.set("view engine", "hbs");
 
-// Datenbank-Setup
+// Datenbank-Setup: Tabellen erstellen, falls nicht vorhanden
 db.serialize(() => {
-  // Benutzer-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL
   )`);
-  // Bilder-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS pictures (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_name TEXT,
@@ -47,7 +45,6 @@ db.serialize(() => {
     user_id INTEGER,
     time DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  // Favoriten-Tabelle
   db.run(`CREATE TABLE IF NOT EXISTS users_pictures_favorites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -56,16 +53,18 @@ db.serialize(() => {
   )`);
 });
 
-// Middleware für Authentifizierung
+// Middleware: Authentifizierung prüfen
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
     next(); // Benutzer ist authentifiziert
   } else {
-    res.redirect("/login"); // Weiterleitung zur Login-Seite
+    res.redirect("/login"); // Nicht authentifiziert: Weiterleitung zur Login-Seite
   }
 };
 
-// Startseite
+// Routen
+
+// Startseite: Weiterleitung zur Login-Seite
 app.get("/", (req, res) => res.redirect("/login"));
 
 // Login-Seite
@@ -80,34 +79,19 @@ app.post("/login", (req, res) => {
 
   // Benutzer in der Datenbank suchen
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
-    if (err) {
-      // Datenbankfehler
-      console.error("Datenbankfehler:", err);
-      res.render("login", {
-        error:
-          "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-      });
-      return;
+    if (err || !user) {
+      return res.render("login", { error: "Benutzername nicht gefunden." });
     }
 
-    if (!user) {
-      // Benutzername nicht gefunden
-      res.render("login", { error: "Benutzername nicht gefunden." });
-      return;
-    }
-
-    // Passwort überprüfen
+    // Passwort validieren
     const isPasswordValid = bcrypt.compareSync(password, user.password);
     if (!isPasswordValid) {
-      res.render("login", {
-        error: "Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.",
-      });
-      return;
+      return res.render("login", { error: "Ungültige Anmeldedaten." });
     }
 
     // Benutzer erfolgreich authentifiziert
-    req.session.user = { id: user.id, username: user.username }; // Sitzung setzen
-    res.redirect("/picturestream"); // Weiterleitung zur Picturestream-Seite
+    req.session.user = { id: user.id, username: user.username };
+    res.redirect("/picturestream");
   });
 });
 
@@ -116,11 +100,11 @@ app.get("/register", (req, res) =>
   res.render("register", { error: req.query.error })
 );
 
-// Registrierung mit Validierung
+// Registrierung-Logik
 app.post(
   "/register",
   [
-    // Validierungsregeln bei der Userregistrierung
+    // Validierungsregeln
     check("username")
       .isAlphanumeric()
       .withMessage("Der Benutzername darf nur Buchstaben und Zahlen enthalten.")
@@ -136,64 +120,59 @@ app.post(
   (req, res) => {
     const errors = validationResult(req);
 
-    // Fehler anzeigen, falls Validierung fehlschlägt
+    // Validierungsfehler anzeigen
     if (!errors.isEmpty()) {
       return res.render("register", { error: errors.array()[0].msg });
     }
 
     const { username, email, password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 10); // Passwort hashen
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
-    // Benutzer in der Datenbank speichern
+    // Benutzer registrieren
     db.run(
       "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
       [username, email, hashedPassword],
       (err) => {
         if (err) {
-          // Datenbankfehler behandeln: Benutzername oder E-Mail bereits registriert
-          if (err.message.includes("UNIQUE constraint failed")) {
-            const conflictField = err.message.includes("username")
-              ? "Benutzername"
-              : "E-Mail-Adresse";
-            return res.render("register", {
-              error: `${conflictField} ist bereits registriert.`,
-            });
-          }
-
-          // Generische Fehlermeldung bei Datenbankfehler
-          console.error("Datenbankfehler:", err);
-          return res.render("register", {
-            error:
-              "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-          });
+          const errorMessage = err.message.includes("UNIQUE constraint failed")
+            ? "Benutzername oder E-Mail bereits registriert."
+            : "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.";
+          return res.render("register", { error: errorMessage });
         }
-
-        // Erfolgreich registriert, weiterleiten zum Login
         res.redirect("/login");
       }
     );
   }
 );
 
-// Route für Picturestream Seite - Selectiert die Bilder nach Uploaddatum
+// Picturestream-Seite
 app.get("/picturestream", isAuthenticated, (req, res) => {
-  db.all("SELECT * FROM pictures ORDER BY time DESC", [], (err, pictures) => {
-    if (err) {
-      return res.render("picturestream", {
-        error: "Fehler beim Laden der Bilder.",
-      });
+  db.all(
+    `SELECT pictures.*, users.username 
+     FROM pictures 
+     JOIN users ON pictures.user_id = users.id 
+     ORDER BY time DESC`,
+    [],
+    (err, pictures) => {
+      if (err) {
+        return res.render("picturestream", {
+          error: "Fehler beim Laden der Bilder.",
+        });
+      }
+      res.render("picturestream", { pictures, user: req.session.user });
     }
-    res.render("picturestream", { pictures, user: req.session.user });
-  });
+  );
 });
 
-// Route für My Picturestream Seite - Selectiert die favorisierten Bilder nach Uploaddatum
+// My Picturestream-Seite
 app.get("/mypicturestream", isAuthenticated, (req, res) => {
   db.all(
-    `SELECT p.* FROM pictures p
-     INNER JOIN users_pictures_favorites f ON p.id = f.picture_id
-     WHERE f.user_id = ? AND f.is_favorite = 1
-     ORDER BY p.time DESC`,
+    `SELECT pictures.*, users.username 
+     FROM pictures 
+     JOIN users ON pictures.user_id = users.id 
+     JOIN users_pictures_favorites ON pictures.id = users_pictures_favorites.picture_id 
+     WHERE users_pictures_favorites.user_id = ? AND users_pictures_favorites.is_favorite = 1 
+     ORDER BY time DESC`,
     [req.session.user.id],
     (err, pictures) => {
       if (err) {
@@ -209,7 +188,7 @@ app.get("/mypicturestream", isAuthenticated, (req, res) => {
 // Upload-Seite
 app.get("/upload", isAuthenticated, (req, res) => res.render("upload"));
 
-// Bilder hochladen
+// Bild hochladen
 app.post("/upload", isAuthenticated, upload.single("picture"), (req, res) => {
   const { title, description } = req.body;
 
@@ -240,7 +219,7 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
 });
 
-// Server starten und Port setzen
+// Server starten
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Server läuft auf http://localhost:${PORT}`)
