@@ -1,17 +1,33 @@
-<h2>Upload Picture</h2>
-<form action="/upload" method="POST" enctype="multipart/form-data">
-  <input type="file" name="picture" class="form-control" required />
-  <input
-    type="text"
-    name="title"
-    placeholder="Title"
-    class="form-control"
-    required
-  />
-  <textarea
-    name="description"
-    placeholder="Description"
-    class="form-control"
-  ></textarea>
-  <button type="submit">Upload</button>
-</form>
+<h2>Bild hochladen</h2>
+
+<!-- Formularcontainer für zentriertes Layout -->
+<div class="upload-form-container">
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <!-- Eingabefeld für Bildtitel -->
+    <label for="title">Titel:</label>
+    <input
+      type="text"
+      id="title"
+      name="title"
+      placeholder="Bildtitel eingeben"
+      required
+    />
+
+    <!-- Eingabefeld für Bildbeschreibung -->
+    <label for="description">Beschreibung:</label>
+    <textarea
+      id="description"
+      name="description"
+      placeholder="Beschreibung des Bildes eingeben"
+      rows="3"
+      required
+    ></textarea>
+
+    <!-- Datei auswählen -->
+    <label for="picture">Datei auswählen:</label>
+    <input type="file" id="picture" name="picture" accept="image/*" required />
+
+    <!-- Upload-Button -->
+    <button type="submit">Bild hochladen</button>
+  </form>
+</div>

@@ -7,6 +7,16 @@
       <p>{{description}}</p>
       <p><strong>Hochgeladen von:</strong> {{username}}</p>
       <small>Hochgeladen am {{time}}</small>
+
+      <!-- Button zum Entfernen des Favoriten -->
+      <form action="/unfavorite/{{id}}" method="POST" style="margin-top: 10px;">
+        <button
+          type="submit"
+          style="background-color: #ff4d4d; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;"
+        >
+          ❌ Favorit entfernen
+        </button>
+      </form>
     </div>
   {{else}}
     <p>Keine Favoritenbilder gefunden.</p>

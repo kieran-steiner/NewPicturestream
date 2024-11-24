@@ -214,6 +214,22 @@ app.post("/favorite/:id", isAuthenticated, (req, res) => {
   );
 });
 
+// Favoriten entfernen
+app.post("/unfavorite/:id", isAuthenticated, (req, res) => {
+  const pictureId = req.params.id;
+
+  db.run(
+    "DELETE FROM users_pictures_favorites WHERE user_id = ? AND picture_id = ?",
+    [req.session.user.id, pictureId],
+    (err) => {
+      if (err) {
+        console.error("Fehler beim Entfernen des Favoriten:", err); // Debug-Ausgabe
+      }
+      res.redirect("/mypicturestream"); // Zur Favoritenliste zurückkehren
+    }
+  );
+});
+
 // Logout
 app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
