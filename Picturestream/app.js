@@ -209,7 +209,7 @@ app.post("/favorite/:id", isAuthenticated, (req, res) => {
     "INSERT INTO users_pictures_favorites (user_id, picture_id, is_favorite) VALUES (?, ?, 1)",
     [req.session.user.id, pictureId],
     () => {
-      res.redirect("/picturestream");
+      res.redirect("/picturestream"); // Zur Picturestream Seite zurückkehren
     }
   );
 });
@@ -225,7 +225,7 @@ app.post("/unfavorite/:id", isAuthenticated, (req, res) => {
       if (err) {
         console.error("Fehler beim Entfernen des Favoriten:", err); // Debug-Ausgabe
       }
-      res.redirect("/mypicturestream"); // Zur Favoritenliste zurückkehren
+      res.redirect("/mypicturestream"); // Zur My Picturestream Seite zurückkehren
     }
   );
 });
