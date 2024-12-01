@@ -49,7 +49,8 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     picture_id INTEGER,
-    is_favorite BOOLEAN DEFAULT 0
+    is_favorite BOOLEAN DEFAULT 0,
+    comment TEXT DEFAUT NULL
   )`);
 });
 
@@ -167,18 +168,17 @@ app.get("/picturestream", isAuthenticated, (req, res) => {
 // My Picturestream-Seite
 app.get("/mypicturestream", isAuthenticated, (req, res) => {
   db.all(
-    `SELECT pictures.*, users.username 
+    `SELECT pictures.id, pictures.file_name, pictures.title, pictures.description, pictures.time, users.username, users_pictures_favorites.comment 
      FROM pictures 
      JOIN users ON pictures.user_id = users.id 
      JOIN users_pictures_favorites ON pictures.id = users_pictures_favorites.picture_id 
      WHERE users_pictures_favorites.user_id = ? AND users_pictures_favorites.is_favorite = 1 
-     ORDER BY time DESC`,
+     ORDER BY pictures.time DESC`,
     [req.session.user.id],
     (err, pictures) => {
       if (err) {
-        return res.render("mypicturestream", {
-          error: "Fehler beim Laden der Favoriten.",
-        });
+        console.error("Fehler beim Laden der Favoriten:", err);
+        return res.render("mypicturestream", { error: "Fehler beim Laden der Favoriten." });
       }
       res.render("mypicturestream", { pictures, user: req.session.user });
     }
@@ -226,6 +226,26 @@ app.post("/unfavorite/:id", isAuthenticated, (req, res) => {
         console.error("Fehler beim Entfernen des Favoriten:", err); // Debug-Ausgabe
       }
       res.redirect("/mypicturestream"); // Zur My Picturestream Seite zurückkehren
+    }
+  );
+});
+
+// Kommentar hinzufügen oder aktualisieren
+app.post("/mypicturestream/comment/:id", isAuthenticated, (req, res) => {
+  const pictureId = req.params.id;
+  const { comment } = req.body;
+
+  // Kommentar aktualisieren oder hinzufügen
+  db.run(
+    `UPDATE users_pictures_favorites 
+     SET comment = ? 
+     WHERE user_id = ? AND picture_id = ?`,
+    [comment, req.session.user.id, pictureId],
+    (err) => {
+      if (err) {
+        console.error("Fehler beim Speichern des Kommentars:", err); // Debugging
+      }
+      res.redirect("/mypicturestream"); // Zurück zur My Picturestream-Seite
     }
   );
 });

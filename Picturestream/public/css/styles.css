@@ -96,7 +96,7 @@ nav {
 .picture-card img {
   width: 100%; /* Bild passt sich der Kartenbreite an */
   height: 150px; /* Fixe Höhe */
-  object-fit: cover; /* Beschneidet das Bild proportional, falls nötig */
+  object-fit: cover; /* Beschneidet das Bild proportional */
   display: block;
 }
 
@@ -194,6 +194,43 @@ nav {
 
 .upload-form-container button:hover {
   background-color: #0056b3; /* Dunkleres Blau beim Hover */
+}
+
+/* Kommentar-Textfeld */
+.picture-card textarea {
+  width: 100%; /* Volle Breite des Containers */
+  padding: 10px; /* Angenehmer Innenabstand */
+  margin-bottom: 10px; /* Abstand zum nächsten Element */
+  border: 1px solid #ccc; /* Leichter Rahmen */
+  border-radius: 5px; /* Abgerundete Ecken */
+  font-size: 14px; /* Konsistente Schriftgröße */
+  font-family: inherit; /* Erbt die Schriftart von 'body' */
+  color: inherit; /* Erbt die Textfarbe von 'body' */
+  background-color: #f9f9f9; /* Leicht grauer Hintergrund */
+  resize: none; /* Deaktiviert Grössenänderung des Textfeldes */
+}
+
+/* Hover- und Fokus-Effekte für das Textfeld */
+.picture-card textarea:focus {
+  border-color: #007bff; /* Blaue Umrandung beim Fokus */
+  outline: none; /* Entfernt Standard-Fokus-Effekt */
+  background-color: #ffffff; /* Weißer Hintergrund beim Fokus */
+}
+
+/* Kommentar-Button */
+.picture-card button {
+  background-color: #87cefa; /* Hellblau */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.picture-card button:hover {
+  background-color: #00bfff; /* Intensiveres Blau beim Hover */
 }
 
 /* Footer Styles */
