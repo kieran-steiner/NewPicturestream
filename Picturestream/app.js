@@ -29,7 +29,7 @@ app.use(
 app.engine("hbs", engine({ defaultLayout: "main", extname: ".hbs" }));
 app.set("view engine", "hbs");
 
-// Datenbank-Setup: Tabellen erstellen, falls nicht vorhanden
+// Datenbank-Setup: Tabellen erstellen, falls nicht vorhanden. Vereinfacht die Neuerstellung nach vollständiger DB Löschung
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -255,7 +255,7 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
 });
 
-// Server starten
+// Server starten-Definition von Port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Server läuft auf http://localhost:${PORT}`)
